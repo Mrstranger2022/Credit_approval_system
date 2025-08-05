@@ -1,18 +1,22 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CustomerRegistrationSerializer
-from .models import Customer
-from .serializers import LoanEligibilityRequestSerializer
-from .utils import calculate_credit_score
-from .serializers import CreateLoanSerializer
-from .models import Loan
-from .utils import calculate_credit_score
-from datetime import timedelta
-import datetime
+from .serializers import (CustomerRegistrationSerializer,
+                          LoanEligibilityRequestSerializer,
+                          CreateLoanSerializer,
+                          LoanDetailSerializer,
+                          LoanListSerializer, )
+from .models import Customer,Loan
 
+from .utils import calculate_credit_score
+
+import datetime
+from datetime import timedelta
+
+
+# customer registration
 class RegisterCustomerView(APIView):
     def post(self, request):
         serializer = CustomerRegistrationSerializer(data=request.data)
@@ -22,7 +26,7 @@ class RegisterCustomerView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+#
 class CheckLoanEligibilityView(APIView):
     def post(self, request):
         serializer = LoanEligibilityRequestSerializer(data=request.data)
@@ -161,3 +165,27 @@ class CreateLoanView(APIView):
             "message": "Loan approved",
             "monthly_installment": round(EMI, 2)
         }, status=201)
+
+class ViewLoanDetailView(APIView):
+    def get(self, request, loan_id):
+        try:
+            loan = Loan.objects.get(id=loan_id)
+        except Loan.DoesNotExist:
+            return Response({"error": "Loan not found"}, status=404)
+
+        serializer = LoanDetailSerializer(loan)
+        return Response(serializer.data, status=200)
+
+
+
+class ViewCustomerLoansView(APIView):
+    def get(self, request, customer_id):
+        try:
+            customer = Customer.objects.get(id=customer_id)
+        except Customer.DoesNotExist:
+            return Response({"error": "Customer not found"}, status=404)
+
+        loans = Loan.objects.filter(customer=customer)
+        serializer = LoanListSerializer(loans, many=True)
+        return Response(serializer.data, status=200)
+

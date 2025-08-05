@@ -1,4 +1,5 @@
-import datetime
+
+from django.utils import timezone
 from django.db import models
 
 class Customer(models.Model):
@@ -20,8 +21,8 @@ class Loan(models.Model):
     interest_rate = models.FloatField(default=10.0)
     monthly_repayment = models.FloatField(default=0.0)
     emis_paid_on_time = models.IntegerField(default=0)
-    start_date = models.DateField(default=datetime.date.today())
-    end_date = models.DateField(default=datetime.date.today())
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)
     active = models.BooleanField(default=True)
 
     def __str__(self):
