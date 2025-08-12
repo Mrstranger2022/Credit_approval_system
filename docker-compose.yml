@@ -1,8 +1,26 @@
-
+version: '3.9'  # optional, can be removed
 
 services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - ./core/data:/app/core/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_NAME=credit_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+
   db:
     image: postgres:13
+    restart: always
     environment:
       POSTGRES_DB: credit_db
       POSTGRES_USER: postgres
@@ -11,16 +29,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
-  web:
-    build: .
-    command: ["./wait-for-it.sh", "db", "python", "manage.py", "runserver", "0.0.0.0:8000"]
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
 
 volumes:
   postgres_data:

@@ -4,18 +4,20 @@ WORKDIR /app
 
 COPY . .
 
-# ✅ Fix: Install netcat (Debian slim needs netcat-openbsd)
+
 RUN apt-get update && apt-get install -y netcat-openbsd
 
 # Install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+#RUN pip install --upgrade pip
+#RUN pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy wait-for-it and give permissions
+# Copy wait-for-it and giving permissions
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
 EXPOSE 8000
 
-# Start the app after DB is ready
+# Starting app after DB is ready
 CMD ["/wait-for-it.sh", "db", "python", "manage.py", "runserver", "0.0.0.0:8000"]
